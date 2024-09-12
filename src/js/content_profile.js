@@ -1,4 +1,5 @@
 var problems = new Map();
+var problemNames = new Map();
 var ratings = new Map();
 var tags = new Map();
 var ratingChartLabel = [];
@@ -83,8 +84,9 @@ function processData(resultArr){
     if(!problems.has(problemId)){
       problems.set(problemId,{
         solved: false,
-        use: false,
+        use: true,
         rating: sub.problem.rating,
+        name: sub.problem.name,
         contestId: sub.problem.contestId,
         index: sub.problem.index,
         tags: sub.problem.tags,
@@ -93,17 +95,27 @@ function processData(resultArr){
     }
     let obj = problems.get(problemId);
     
-    if (obj.rating && 
+    if (problemNames.has(obj.name)){
+      let other = problemNames.get(obj.name);
+      // If the same problem is solved in both Div 1 and Div 2 contests, keep the earliest submission and ignore the other.
+      if (Math.abs(other.contestId - obj.contestId) == 1){
+        obj.use = false;
+      }
+    }
+
+    problemNames.set(obj.name, {contestId: obj.contestId});
+    
+    if (!(obj.rating && 
        (obj.rating >= rating_min || rating_min == -1) &&
        (obj.rating <= rating_max || rating_max == -1) && 
        (obj.date >= date_min || date_min == -1) && 
-       (obj.date < date_max || date_max == -1))
-      obj.use = true;
+       (obj.date < date_max || date_max == -1)))
+      obj.use = false;
       
     if(sub.verdict=="OK")
       obj.solved = true;
     
-      problems.set(problemId,obj);
+    problems.set(problemId, obj);
   }
   let unsolvedCount = 0;
   problems.forEach(function(prob){
