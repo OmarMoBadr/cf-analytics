@@ -2,6 +2,8 @@
 
 **CF Harvest** is a browser extension that enhances [Codeforces](https://codeforces.com/) profile by providing interactive problem rating charts, alt-account merging, and an upsolving queue for past contests participations (live and virtual).
 
+![Problem Ratings](Screenshots/screenshot1.png)
+
 ---
 
 ## Features
