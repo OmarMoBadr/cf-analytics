@@ -1,33 +1,316 @@
 <!-- Problem Rating -->
-<div class="roundbox " style="padding:2em 1em 0 1em;margin-top:1em;" height="10">
+<div id="cfaRatingsSection" class="roundbox " style="padding:2em 1em 0 1em;margin-top:1em;" height="10">
     <div class="roundbox-lt">&nbsp;</div>
     <div class="roundbox-rt">&nbsp;</div>
     <div class="roundbox-lb">&nbsp;</div>
     <div class="roundbox-rb">&nbsp;</div>
-    <h4>
-        Problem Ratings
-    </h4>
-    <ul>
-        <li id="dateLi" style="display:none">
-            from
-            <span id="dateMinSpan">oldest</span>
-            to
-            <span id="dateMaxSpan">newest</span>
-        </li>
+    <style>
+        .cfa-input {
+            padding: 2px 4px;
+            font-size: 11px;
+            border: 1px solid #aaa;
+            border-radius: 3px;
+            background-color: #fff;
+            color: #000;
+            font-family: verdana, arial, sans-serif;
+            box-sizing: border-box;
+        }
 
-        <li id="ratingLi" style="display:none">
-            from
-            <span id="ratingMinSpan">min</span>
-            to
-            <span id="ratingMaxSpan">max</span>
-        </li>
-    </ul>
+        .cfa-input:focus {
+            border-color: #3b5998;
+            outline: none;
+        }
+
+        .cfa-dual-slider {
+            position: relative;
+            width: 240px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            margin-top: 24px;
+            margin-bottom: 4px;
+        }
+
+        .cfa-thumb-bubble {
+            position: absolute;
+            top: -20px;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: bold;
+            font-family: verdana, arial, sans-serif;
+            padding: 1px 4px;
+            background: #ffffff;
+            border: 1px solid #aaa;
+            border-radius: 3px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 4;
+            transition: top 0.1s ease;
+        }
+
+        .cfa-thumb-bubble::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -3px;
+            border-width: 3px 3px 0 3px;
+            border-style: solid;
+            border-color: #aaa transparent transparent transparent;
+        }
+
+        .user-gray {
+            color: #808080 !important;
+        }
+
+        .user-green {
+            color: #008000 !important;
+        }
+
+        .user-cyan {
+            color: #03a89e !important;
+        }
+
+        .user-blue {
+            color: #0000ff !important;
+        }
+
+        .user-violet {
+            color: #a0a !important;
+        }
+
+        .user-orange {
+            color: #ff8c00 !important;
+        }
+
+        .user-red {
+            color: #ff0000 !important;
+        }
+
+        .legendary-user-first-letter {
+            color: #000000 !important;
+        }
+
+        .cfa-slider-track {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: #e5e5e5;
+            border: 1px solid #bbb;
+            border-radius: 2px;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .cfa-slider-highlight {
+            position: absolute;
+            height: 4px;
+            background: #3b5998;
+            border-radius: 2px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+
+        .cfa-range-input {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: none;
+            pointer-events: none;
+            -webkit-appearance: none;
+            appearance: none;
+            margin: 0;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .cfa-range-input::-webkit-slider-thumb {
+            pointer-events: auto;
+            -webkit-appearance: none;
+            appearance: none;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffffff linear-gradient(to bottom, #ffffff, #e1e1e1);
+            border: 1px solid #777;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+
+        .cfa-range-input::-webkit-slider-thumb:hover {
+            border-color: #3b5998;
+            box-shadow: 0 1px 4px rgba(59, 89, 152, 0.4);
+        }
+
+        .cfa-range-input::-moz-range-thumb {
+            pointer-events: auto;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #ffffff linear-gradient(to bottom, #ffffff, #e1e1e1);
+            border: 1px solid #777;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }
+
+        .cfa-range-input::-moz-range-thumb:hover {
+            border-color: #3b5998;
+            box-shadow: 0 1px 4px rgba(59, 89, 152, 0.4);
+        }
+
+        .cfa-queue-row:hover {
+            background-color: #f0f4f8 !important;
+        }
+
+        .cfa-queue-filter-tab:hover,
+        .cfa-queue-type-tab:hover {
+            text-decoration: underline !important;
+        }
+
+        #cfaToSolveSection .datatable,
+        #cfaToSolveList table,
+        #cfaToSolveList>div {
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+
+        #cfaSortRatingHeader:hover {
+            background-color: #edf2f8 !important;
+        }
+    </style>
+
+    <div>
+        <h4 id="problemRatingTitle" style="margin: 0;">
+            Problem Ratings
+            <span id="problemRatingUser"
+                style="display: block; font-size: 0.9em; font-weight: normal; margin-top: 3px;"></span>
+        </h4>
+        <ul style="margin: 6px 0 0 0; padding-left: 20px;">
+            <li id="ratingLi" style="display:none"></li>
+            <li id="dateLi" style="display:none"></li>
+        </ul>
+    </div>
+
+    <!-- Loading Bar -->
+    <div id="cfaLoadingContainer" style="display: none; margin: 10px 0 12px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span id="cfaLoadingText"
+                style="font-size: 11px; color: #555; font-family: verdana, arial, sans-serif;">Loading
+                submissions...</span>
+            <span id="cfaLoadingPercent"
+                style="font-size: 11px; font-weight: bold; color: #3b5998; font-family: verdana, arial, sans-serif;"></span>
+        </div>
+        <div
+            style="width: 100%; height: 5px; background: #e9ecef; border-radius: 3px; overflow: hidden; position: relative;">
+            <div id="cfaLoadingBar"
+                style="width: 0%; height: 100%; background: #3b5998; border-radius: 3px; transition: width 0.3s ease;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Codeforces Native Settings & Filters Box -->
+    <div class="roundbox sidebox borderTopRound borderBottomRound" style="margin: 10px 0 14px 0;">
+        <div class="caption titled" id="cfaCaptionHeader" style="cursor: pointer;">
+            &rarr; Settings &amp; Filters
+            <div class="top-links">
+                <a href="javascript:void(0)" id="cfaToggleSettingsBtn">[<span id="cfaToggleText">show</span> <span
+                        id="cfaToggleIcon">&#9662;</span>]</a>
+            </div>
+        </div>
+
+        <div id="cfaSettingsContainer" style="display: none; padding: 0.7em;">
+            <div
+                style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; justify-content: space-around;">
+                <!-- Rating Range Dual Slider -->
+                <div style="display: flex; flex-direction: column; gap: 3px; min-width: 240px;">
+                    <label
+                        style="color: #333333; font-size: 11px; font-weight: bold; font-family: verdana, arial, sans-serif;">Rating:</label>
+                    <div class="cfa-dual-slider">
+                        <div class="cfa-thumb-bubble user-gray" id="cfaMinBubble" style="left: 0%;">800</div>
+                        <div class="cfa-thumb-bubble user-red" id="cfaMaxBubble" style="left: 100%;"><span
+                                class="legendary-user-first-letter" style="color: #000000 !important;">3</span>500</div>
+                        <div class="cfa-slider-track"></div>
+                        <div class="cfa-slider-highlight" id="cfaSliderHighlight" style="left: 0%; width: 100%;"></div>
+                        <input type="range" id="cfaRatingMin" min="800" max="3500" step="100" value="800"
+                            class="cfa-range-input" style="z-index: 2;" />
+                        <input type="range" id="cfaRatingMax" min="800" max="3500" step="100" value="3500"
+                            class="cfa-range-input" style="z-index: 2;" />
+                    </div>
+                </div>
+
+                <!-- Date Range -->
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <label
+                        style="display: block; color: #333333; font-size: 11px; font-weight: bold; margin-bottom: 2px; font-family: verdana, arial, sans-serif;">Date:</label>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                        <span
+                            style="color: #555555; font-size: 11px; font-family: verdana, arial, sans-serif;">from</span>
+                        <input type="date" id="cfaDateMin" class="cfa-input" />
+                        <span
+                            style="color: #555555; font-size: 11px; font-family: verdana, arial, sans-serif;">to</span>
+                        <input type="date" id="cfaDateMax" class="cfa-input" />
+                    </div>
+                </div>
+
+                <!-- Display Modes -->
+                <div style="display: flex; flex-direction: column; gap: 3px;">
+                    <label
+                        style="display: block; color: #333333; font-size: 11px; font-weight: bold; margin-bottom: 2px; font-family: verdana, arial, sans-serif;">Display:</label>
+                    <label
+                        style="font-size: 11px; color: #333333; cursor: pointer; display: flex; align-items: center; gap: 5px; margin: 0; user-select: none; font-family: verdana, arial, sans-serif;">
+                        <input type="checkbox" id="cfaCumulativeMode"
+                            style="cursor: pointer; margin: 0; vertical-align: middle;" />
+                        <span>Cumulative mode</span>
+                    </label>
+                    <label
+                        style="font-size: 11px; color: #333333; cursor: pointer; display: flex; align-items: center; gap: 5px; margin: 0; user-select: none; font-family: verdana, arial, sans-serif;">
+                        <input type="checkbox" id="cfaStackedMode"
+                            style="cursor: pointer; margin: 0; vertical-align: middle;" />
+                        <span>Stacked mode</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Action Buttons (Exact Codeforces Gym Filter Style) -->
+            <div align="center">
+                <input style="padding: 0 1em; margin-top: 1em;" type="button" id="cfaResetBtn" value="Reset" />
+                <input style="padding: 0 1em; margin-top: 1em; margin-left: 8px;" type="submit" id="cfaUpdateBtn"
+                    value="Filter" />
+            </div>
+        </div>
+    </div>
     <div>
         <canvas id="problemRatingChart"></canvas>
     </div>
 </div>
+<!-- Upsolve Queue -->
+<div id="cfaToSolveSection" class="roundbox " style="padding:2em 1em 0 1em;margin-top:1em;" height="10">
+    <div class="roundbox-lt">&nbsp;</div>
+    <div class="roundbox-rt">&nbsp;</div>
+    <div class="roundbox-lb">&nbsp;</div>
+    <div class="roundbox-rb">&nbsp;</div>
+    <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+            <h4 style="margin: 0;">Upsolve Queue</h4>
+            <a href="javascript:void(0)" id="cfaToSolveRefreshBtn"
+                style="font-size: 0.8em; color: #1a0dab; text-decoration: none;"
+                title="Check for newly published ratings and reload queue">&#8635; Refresh</a>
+        </div>
+        <span id="cfaToSolveCountBadge" style="font-size: 0.85em; color: #555;"></span>
+    </div>
+    <div id="cfaToSolveSubtitle" style="font-size: 0.85em; color: #666; margin: 6px 0 12px 0;"></div>
+    <div id="cfaToSolveContainer">
+        <p id="cfaToSolveStatus" style="color: #666; font-style: italic; margin: 10px 0;">Loading queue...</p>
+        <div id="cfaToSolveList"></div>
+    </div>
+    <br>
+</div>
 <!-- Tags Solved-->
-<div class="roundbox " style="padding:2em 1em 0 1em;margin-top:1em;" height="10">
+<div id="cfaTagsSection" class="roundbox " style="padding:2em 1em 0 1em;margin-top:1em;" height="10">
     <div class="roundbox-lt">&nbsp;</div>
     <div class="roundbox-rt">&nbsp;</div>
     <div class="roundbox-lb">&nbsp;</div>
@@ -46,7 +329,7 @@
     <br>
 </div>
 <!-- Unsolved Problems Count and List -->
-<div class="roundbox " style="padding:2em 1em 0 1em;margin-top:1em;" height="10">
+<div id="cfaUnsolvedSection" class="roundbox " style="padding:2em 1em 0 1em;margin-top:1em;" height="10">
     <div class="roundbox-lt">&nbsp;</div>
     <div class="roundbox-rt">&nbsp;</div>
     <div class="roundbox-lb">&nbsp;</div>
@@ -59,4 +342,32 @@
     <br>
     <p id="unsolved_list"></p>
     <br>
+</div>
+<!-- Solved Problems Modal -->
+<div id="solvedProblemsModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.55); z-index: 100000; align-items: center; justify-content: center;">
+    <div class="roundbox"
+        style="background: #fff; max-width: 640px; width: 92%; max-height: 85vh; display: flex; flex-direction: column; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); padding: 0; overflow: hidden; position: relative;">
+        <div
+            style="padding: 14px 18px; border-bottom: 1px solid #e1e1e1; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa;">
+            <h4 id="solvedModalTitle" style="margin: 0; font-size: 1.15em;"></h4>
+            <button id="solvedModalClose"
+                style="background: transparent; border: none; font-size: 1.6em; cursor: pointer; line-height: 1; color: #666;">&times;</button>
+        </div>
+        <div
+            style="padding: 10px 18px; border-bottom: 1px solid #eee; display: flex; gap: 8px; background: #fff; flex-wrap: wrap;">
+            <button class="solved-tab-btn" data-tab="live"
+                style="padding: 5px 12px; border-radius: 14px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 0.9em;">Live
+                Contest</button>
+            <button class="solved-tab-btn" data-tab="virtual"
+                style="padding: 5px 12px; border-radius: 14px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 0.9em;">Virtual
+                Contest</button>
+            <button class="solved-tab-btn" data-tab="practice"
+                style="padding: 5px 12px; border-radius: 14px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 0.9em;">Practice</button>
+            <button class="solved-tab-btn" data-tab="all"
+                style="padding: 5px 12px; border-radius: 14px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 0.9em;">All</button>
+        </div>
+        <div id="solvedModalBody" style="padding: 12px 18px; overflow-y: auto; flex: 1; max-height: 55vh;">
+        </div>
+    </div>
 </div>

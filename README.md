@@ -1,13 +1,22 @@
-# CF Analytics
+# CF Harvest 🌾
 
-<a href="https://chrome.google.com/webstore/detail/cf-analytics/hhljbjodjdbjbggddjaidojnlmaobcpo"><img src="https://i.imgur.com/iswHnpJ.png" alt="Chrome Web Store" height="48"></a>
-<a href="https://addons.mozilla.org/en-US/firefox/addon/cf-analytics/"><img src="https://i.imgur.com/WJ9Fhop.png" alt="Mozilla Add-ons" height="48"></a>&emsp;
+**CF Harvest** is a browser extension that enhances [Codeforces](https://codeforces.com/) profile by providing interactive problem rating charts, alt-account merging, and an upsolving queue for past contests participations (live and virtual).
 
-**Analyse Codeforces profiles**
+---
 
-CF Analytics extension/add-on improves the [Codeforces](https://codeforces.com/) profile webpage to include statistics of problems solved by the user. The *Problem Rating* graph is a bar chart showing problems solved for each problem rating. The *Tags Solved* graph is a doughnut chart displaying tags solved across any problem and also lists a count for each tag. The *Unsolved Problems* shows a count of all problems attempted with not correct verdict and also lists them.
+## Features
 
-## How does it works?
-The extension runs entirely on the browser and communicates only with the [Codeforces API](https://codeforces.com/apiHelp) to get the raw data.
+- **Stacked & Cumulative Rating Charts:** View solved problems broken down by **Live Contest**, **Virtual Contest**, and **Practice**.
+- **Interactive Solved Modal:** Click any rating bar to inspect problems solved with this rating, filtered by contest type (live/virtual/practice).
+- **"To Solve" Queue:** Generates an upsolving list from recent contest participations (live & virtual), customizable by maximum rating (e.g., ≤ 2100) or problem index (e.g., ≤ E).
+- **Alt Account Merger:** Combine and deduplicate submission histories across multiple Codeforces handles into one unified view.
+- **Tags Solved Doughnut Chart:** Breakdown of solved tags with direct problemset filter links.
+- **Custom Layout & Controls:** In-page slider filters for rating & date ranges, responsive layout, and section visibility toggles.
 
-It processes the raw data to create charts/graphs and lists.
+---
+
+## 📄 License & Credits
+
+- **License:** [MIT License](LICENSE)
+- **Author:** [OmarMoBadr](https://codeforces.com/profile/OmarMoBadr)
+- **Original Base Work:** [apoorva222g](https://github.com/ApoorvaRajBhadani/cf-analytics)

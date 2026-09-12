@@ -5,60 +5,387 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CF Analytics</title>
-
+    <title>CF Harvest</title>
     <script src="lib/jquery-3.6.0.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 300px;
+            font-family: verdana, arial, sans-serif;
+            background-color: #ffffff;
+            color: #222222;
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .header-title {
+            font-size: 15px;
+            font-weight: bold;
+            color: #3b5998;
+        }
+
+        .header-badge {
+            font-size: 10px;
+            color: #666666;
+            background: #f1f3f5;
+            border: 1px solid #dcdcdc;
+            padding: 1px 5px;
+            border-radius: 3px;
+        }
+
+        /* Section Block */
+        .section {
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 6px;
+        }
+
+        /* Form Inputs */
+        .form-group {
+            margin-bottom: 6px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #444444;
+            margin-bottom: 2px;
+        }
+
+        .span-val {
+            font-size: 11px;
+            font-weight: bold;
+            color: #3b5998;
+        }
+
+        input[type="number"],
+        input[type="date"],
+        select,
+        textarea {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid #cccccc;
+            color: #222222;
+            font-size: 11px;
+            border-radius: 3px;
+            padding: 4px 6px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        input[type="number"]:focus,
+        input[type="date"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #3b5998;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 48px;
+            font-family: monospace;
+            font-size: 11px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #333333;
+            cursor: pointer;
+            padding: 2px 0;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .hint-text {
+            font-size: 10px;
+            color: #777777;
+            margin-top: 2px;
+        }
+
+        /* Buttons - Plain Codeforces Style */
+        .btn-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 14px;
+            margin-bottom: 12px;
+        }
+
+        input[type="button"],
+        input[type="submit"] {
+            flex: 1;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-family: verdana, arial, sans-serif;
+            cursor: pointer;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding-top: 6px;
+            font-size: 11px;
+            color: #666666;
+        }
+
+        .footer a {
+            color: #1a0dab;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-sub {
+            font-size: 10px;
+            color: #888888;
+            margin-top: 2px;
+        }
+
+        /* Rating Colors & Codeforces Handle Styling */
+        .rated-user {
+            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+            font-weight: bold !important;
+            text-decoration: none !important;
+        }
+
+        .user-gray {
+            color: #808080 !important;
+            font-weight: bold;
+        }
+
+        .user-green {
+            color: #008000 !important;
+            font-weight: bold;
+        }
+
+        .user-cyan {
+            color: #03a89e !important;
+            font-weight: bold;
+        }
+
+        .user-blue {
+            color: #0000ff !important;
+            font-weight: bold;
+        }
+
+        .user-violet {
+            color: #a0a !important;
+            font-weight: bold;
+        }
+
+        .user-orange {
+            color: #ff8c00 !important;
+            font-weight: bold;
+        }
+
+        .user-red {
+            color: #ff0000 !important;
+            font-weight: bold;
+        }
+
+        .user-legendary {
+            background: linear-gradient(to right, #000000 0, #000000 calc(6px + 0.9ch), #ff0000 calc(6px + 0.9ch), #ff0000 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            font-weight: bold !important;
+        }
+    </style>
 </head>
 
-<style>
-    input[type="number"],
-    input[type="date"] {
-        width: 95%;
-        padding: 2px;
-    }
-
-    input[type="button"],
-    input[type="submit"] {
-        width: 40%;
-        padding: 5px;
-    }
-
-    p {
-        margin: 5px 0;
-    }
-</style>
-
 <body>
-    <div style="width: 200px;">
-        <h2>
-            CF Analytics
-        </h2>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-title">CF Harvest</div>
+        <div class="header-badge">v1.0.0</div>
+    </div>
 
-        <div style="margin: 0 10px; font-size: 1.2em;">
-            <p>Min Rating: <span id="ratingMinSpan">min</span></p>
-            <input type="number" id="ratingMin" min="800" max="3500" step="100" placeholder="min" />
-
-            <p>Max Rating: <span id="ratingMaxSpan">max</span></p>
-            <input type="number" id="ratingMax" min="800" max="3500" step="100" placeholder="max" />
-
-            <p>Min Date: <span id="dateMinSpan">oldest</span></p>
-            <input type="date" id="dateMin"/>
-
-            <p>Max Date: <span id="dateMaxSpan">newest</span></p>
-            <input type="date" id="dateMax"/>
-
-            <div style="width:100%; margin-top:20px; display: flex; justify-content: space-around;">
-                <input type="button" id="reset" value="Reset" />
-                <input type="submit" id="update" value="Update" />
+    <!-- Rating & Date Filters -->
+    <div class="section">
+        <div class="section-title">Filter Submissions</div>
+        <div class="grid-2">
+            <div class="form-group">
+                <div class="label-row">
+                    <span>Min Rating</span>
+                    <span id="ratingMinSpan" class="span-val">min</span>
+                </div>
+                <input type="number" id="ratingMin" min="800" max="3500" step="100" placeholder="min" />
+            </div>
+            <div class="form-group">
+                <div class="label-row">
+                    <span>Max Rating</span>
+                    <span id="ratingMaxSpan" class="span-val">max</span>
+                </div>
+                <input type="number" id="ratingMax" min="800" max="3500" step="100" placeholder="max" />
             </div>
         </div>
-
-        <h4>
-            <a href="https://codeforces.com/profile">View your profile analytics</a>
-        </h4>
-        Developed by <a href="https://codeforces.com/profile/apoorva222g">apoorva222g</a>
-        Support <a href="https://buymeacoffee.com/apoorva222g">☕Buy me a coffee</a>
+        <div class="grid-2" style="margin-top: 4px;">
+            <div class="form-group">
+                <div class="label-row">
+                    <span>Min Date</span>
+                    <span id="dateMinSpan" class="span-val">oldest</span>
+                </div>
+                <input type="date" id="dateMin" />
+            </div>
+            <div class="form-group">
+                <div class="label-row">
+                    <span>Max Date</span>
+                    <span id="dateMaxSpan" class="span-val">newest</span>
+                </div>
+                <input type="date" id="dateMax" />
+            </div>
+        </div>
     </div>
+
+    <!-- Display Modes & Profile Sections -->
+    <div class="section">
+        <div class="section-title">Display & Sections</div>
+        <div class="grid-2">
+            <label class="checkbox-label">
+                <input type="checkbox" id="cumulativeMode" />
+                <span>Cumulative mode</span>
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="stackedMode" checked />
+                <span>Stacked mode</span>
+            </label>
+        </div>
+        <div style="margin-top: 6px; padding-top: 4px; border-top: 1px dashed #e1e1e1;">
+            <div class="grid-2">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="showRatingsSection" checked />
+                    <span>Problem Ratings</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="showToSolveSection" checked />
+                    <span>Upsolve Queue</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="showTagsSection" />
+                    <span>Tags Solved</span>
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="showUnsolvedSection" />
+                    <span>Unsolved List</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upsolve Queue Settings -->
+    <div class="section">
+        <div class="section-title">Upsolve Queue Settings</div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <div class="label-row"><span>Max Problem Index</span></div>
+                <select id="toSolveMaxIndex">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                    <option value="E" selected>E</option>
+                    <option value="F">F</option>
+                    <option value="G">G</option>
+                    <option value="ALL">All Problems</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <div class="label-row"><span>Max Rating</span></div>
+                <input type="number" id="toSolveMaxRating" min="800" max="3500" step="100" placeholder="no limit" />
+            </div>
+        </div>
+        <div class="hint-text">Index &le; Max Index AND Rating &le; Max Rating.</div>
+
+        <div class="grid-2" style="margin-top: 6px;">
+            <div class="form-group">
+                <div class="label-row"><span>Contests Count</span></div>
+                <input type="number" id="toSolveContestsCount" min="1" max="50" placeholder="e.g. 5" />
+            </div>
+            <div class="form-group">
+                <div class="label-row"><span>Oldest Date</span></div>
+                <input type="date" id="toSolveSinceDate" />
+            </div>
+        </div>
+        <div class="hint-text" style="line-height: 1.35; margin-top: 2px;">Upsolve from the last N contests (e.g. 5), all participations since a date, or both.</div>
+
+        <div class="grid-2" style="margin-top: 6px;">
+            <label class="checkbox-label">
+                <input type="checkbox" id="toSolveIncludeLive" checked />
+                <span>Live contests</span>
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="toSolveIncludeVirtual" checked />
+                <span>Virtual contests</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Merged Accounts -->
+    <div class="section" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+        <div class="section-title">Merged Accounts (Alts)</div>
+        <div style="font-size: 11px; color: #555555; margin-bottom: 4px;">Combine multiple handles into one profile
+            graph.</div>
+        <textarea id="mergedAccountsText" rows="3"
+            placeholder="tourist, tourist_alt&#10;main_handle, alt1, alt2, ..."></textarea>
+        <div class="hint-text" style="line-height: 1.35; margin-top: 3px;">
+            Comma-separated handles (one group per line). When viewing any handle in a group, all listed alts are
+            merged.
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="btn-row">
+        <input type="button" id="reset" value="Reset" />
+        <input type="submit" id="update" value="Update" />
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <a href="https://codeforces.com/profile" target="_blank">View Profile Analytics</a>
+        <div class="footer-sub">
+            Author: <a href="https://codeforces.com/profile/OmarMoBadr" target="_blank"
+                class="rated-user user-blue">OmarMoBadr</a> &bull; Base by apoorva222g
+        </div>
+    </div>
+
     <script src="js/utils.js"></script>
     <script src="js/popup.js"></script>
 </body>

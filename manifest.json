@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "CF Analytics",
-    "version": "3.0.0",
-    "description": "Analyse Codeforces profiles",
+    "name": "CF Harvest",
+    "version": "1.0.0",
+    "description": "Better Analytics for Codeforces profiles.",
     "icons":{
         "128": "src/asset/icon128.png",
         "48": "src/asset/icon48.png",
@@ -11,7 +11,7 @@
     "action":{
         "default_icon": "src/asset/icon16.png",
         "default_popup": "src/popup.html",
-        "default_title": "CF Analytics"
+        "default_title": "CF Harvest"
     },
     "background":{
         "service_worker": "src/js/service_worker.js",
@@ -20,7 +20,7 @@
     "content_scripts":[
         {
             "matches": ["https://codeforces.com/profile/*"],
-            "js": ["src/lib/jquery-3.6.0.min.js","src/lib/chart.min.js","src/js/content_profile.js", "src/js/utils.js"],
+            "js": ["src/lib/jquery-3.6.0.min.js","src/lib/chart.min.js","src/js/utils.js","src/js/content_profile.js"],
             "css": ["src/css/content_profile.css"]
         }
     ],
