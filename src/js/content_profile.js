@@ -365,7 +365,8 @@ async function fetchContestStandings(contestId, contestTime = 0, force = false) 
 
 let toSolveQueueSequence = 0;
 let currentQueueProblems = [];
-let currentRatingSortDir = 'none';
+let currentSortColumn = 'none';
+let currentSortDir = 'none';
 let currentQueueFilter = 'all';
 let currentTypeFilter = 'all';
 let userRequestedQueueForPage = false;
@@ -672,7 +673,8 @@ async function renderToSolveQueue(force = false, userRequested = false) {
     item.originalIndex = idx;
   });
   currentQueueProblems = allQueueProblems;
-  currentRatingSortDir = 'none';
+  currentSortColumn = 'none';
+  currentSortDir = 'none';
   currentQueueFilter = 'all';
   currentTypeFilter = 'all';
 
@@ -705,7 +707,7 @@ async function renderToSolveQueue(force = false, userRequested = false) {
           <tr class="first-row" style="background-color: #f8f8f8; border-top: 1px solid #b9b9b9; border-bottom: 1px solid #b9b9b9;">
             <th class="id" style="text-align: center; width: 5.5em; padding: 6px 10px; font-weight: bold; color: #333; white-space: nowrap;">#</th>
             <th style="padding: 6px 10px; font-weight: bold; color: #333;">Name</th>
-            <th style="padding: 6px 10px; font-weight: bold; color: #333;">Contest</th>
+            <th id="cfaSortContestHeader" style="padding: 6px 10px; font-weight: bold; color: #333; cursor: pointer; user-select: none;" title="Click to sort by date of participation (oldest first)">Contest <span id="cfaContestSortIcon" style="font-size: 10px; margin-left: 2px; color: #888;">&#x25B4;&#x25BE;</span></th>
             <th id="cfaSortRatingHeader" style="text-align: left; width: 6.5em; padding: 6px 10px; font-weight: bold; color: #333; white-space: nowrap; cursor: pointer; user-select: none;" title="Click to sort by rating (easiest first)">Rating <span id="cfaRatingSortIcon" style="font-size: 10px; margin-left: 2px; color: #888;">&#x25B4;&#x25BE;</span></th>
             <th style="text-align: center; width: 5.5em; padding: 6px 10px; font-weight: bold; color: #333; white-space: nowrap;">Status</th>
           </tr>
@@ -750,20 +752,20 @@ function renderQueueRowsHtml(items) {
     const typeLabel = isLive ? 'Live' : 'Virtual';
 
     let borderTopStyle = "border-top: 1px solid #e1e1e1;";
-    if (currentRatingSortDir === 'none' && idx > 0 && item.contestId !== items[idx - 1].contestId) {
+    if ((currentSortColumn === 'none' || currentSortColumn === 'contest') && idx > 0 && item.contestId !== items[idx - 1].contestId) {
       borderTopStyle = "border-top: 1px solid #888888;";
     }
 
     return `
       <tr class="cfa-queue-row" data-contest-id="${cid}" data-status="${item.isUpsolved ? 'upsolved' : 'unsolved'}" data-type="${isLive ? 'live' : 'virtual'}" style="${bgStyle} ${borderTopStyle}">
         <td class="id" style="text-align: center; padding: 6px 10px; font-weight: bold; white-space: nowrap;">
-          <a href="${problemUrl}" style="color: #1a0dab; text-decoration: none;">${cid}${escapeHtml(p.index)}</a>
+          <a href="${problemUrl}" target="_blank" rel="noopener noreferrer" style="color: #1a0dab; text-decoration: none;">${cid}${escapeHtml(p.index)}</a>
         </td>
         <td style="padding: 6px 10px;">
-          <a href="${problemUrl}" style="color: #1a0dab; text-decoration: none; font-weight: 500;">${escapeHtml(p.name)}</a>
+          <a href="${problemUrl}" target="_blank" rel="noopener noreferrer" style="color: #1a0dab; text-decoration: none; font-weight: 500;">${escapeHtml(p.name)}</a>
         </td>
         <td style="padding: 6px 10px;">
-          <a href="${contestUrl}" style="color: #3b5998; text-decoration: none;">${escapeHtml(item.contestName)}</a>
+          <a href="${contestUrl}" target="_blank" rel="noopener noreferrer" style="color: #3b5998; text-decoration: none;">${escapeHtml(item.contestName)}</a>
           <span style="font-size: 11px; color: #777; margin-left: 5px;">(${typeLabel}, ${formattedDate})</span>
         </td>
         <td style="text-align: left; padding: 6px 10px; white-space: nowrap;">
@@ -779,20 +781,34 @@ function renderQueueRowsHtml(items) {
 
 function getSortedQueueProblems() {
   const list = [...currentQueueProblems];
-  if (currentRatingSortDir === 'asc') {
-    list.sort((a, b) => {
-      const rA = (typeof a.problem.rating === 'number' && a.problem.rating > 0) ? a.problem.rating : 99999;
-      const rB = (typeof b.problem.rating === 'number' && b.problem.rating > 0) ? b.problem.rating : 99999;
-      if (rA !== rB) return rA - rB;
-      return a.originalIndex - b.originalIndex;
-    });
-  } else if (currentRatingSortDir === 'desc') {
-    list.sort((a, b) => {
-      const rA = (typeof a.problem.rating === 'number' && a.problem.rating > 0) ? a.problem.rating : -1;
-      const rB = (typeof b.problem.rating === 'number' && b.problem.rating > 0) ? b.problem.rating : -1;
-      if (rA !== rB) return rB - rA;
-      return a.originalIndex - b.originalIndex;
-    });
+  if (currentSortColumn === 'rating') {
+    if (currentSortDir === 'asc') {
+      list.sort((a, b) => {
+        const rA = (typeof a.problem.rating === 'number' && a.problem.rating > 0) ? a.problem.rating : 99999;
+        const rB = (typeof b.problem.rating === 'number' && b.problem.rating > 0) ? b.problem.rating : 99999;
+        if (rA !== rB) return rA - rB;
+        return a.originalIndex - b.originalIndex;
+      });
+    } else if (currentSortDir === 'desc') {
+      list.sort((a, b) => {
+        const rA = (typeof a.problem.rating === 'number' && a.problem.rating > 0) ? a.problem.rating : -1;
+        const rB = (typeof b.problem.rating === 'number' && b.problem.rating > 0) ? b.problem.rating : -1;
+        if (rA !== rB) return rB - rA;
+        return a.originalIndex - b.originalIndex;
+      });
+    }
+  } else if (currentSortColumn === 'contest') {
+    if (currentSortDir === 'asc') {
+      list.sort((a, b) => {
+        if (a.contestTime !== b.contestTime) return a.contestTime - b.contestTime;
+        return a.originalIndex - b.originalIndex;
+      });
+    } else if (currentSortDir === 'desc') {
+      list.sort((a, b) => {
+        if (a.contestTime !== b.contestTime) return b.contestTime - a.contestTime;
+        return a.originalIndex - b.originalIndex;
+      });
+    }
   } else {
     list.sort((a, b) => a.originalIndex - b.originalIndex);
   }
@@ -817,9 +833,9 @@ function applyQueueFilterAndSortUI() {
     }
   });
 
-  // Apply contest separators when no sorting is applied
+  // Apply contest separators when sorted by contest or no sort applied
   $('.cfa-queue-row').css('border-top', '1px solid #e1e1e1');
-  if (currentRatingSortDir === 'none') {
+  if (currentSortColumn === 'none' || currentSortColumn === 'contest') {
     let lastVisibleContestId = null;
     $('.cfa-queue-row:visible').each(function () {
       const cid = String($(this).attr('data-contest-id') || '');
@@ -832,27 +848,58 @@ function applyQueueFilterAndSortUI() {
     });
   }
 
-  let iconHtml = '&#x25B4;&#x25BE;';
-  let sortTitle = 'Click to sort by rating (easiest first)';
-  if (currentRatingSortDir === 'asc') {
-    iconHtml = '<span style="color: #1a0dab; font-weight: bold;">&#9650;</span>';
-    sortTitle = 'Sorted by rating ascending (easiest first). Click to sort descending (hardest first)';
-  } else if (currentRatingSortDir === 'desc') {
-    iconHtml = '<span style="color: #1a0dab; font-weight: bold;">&#9660;</span>';
-    sortTitle = 'Sorted by rating descending (hardest first). Click to restore default contest order';
+  let ratingIcon = '&#x25B4;&#x25BE;';
+  let ratingTitle = 'Click to sort by rating (easiest first)';
+  if (currentSortColumn === 'rating') {
+    if (currentSortDir === 'asc') {
+      ratingIcon = '<span style="color: #1a0dab; font-weight: bold;">&#9650;</span>';
+      ratingTitle = 'Sorted by rating ascending (easiest first). Click to sort descending (hardest first)';
+    } else if (currentSortDir === 'desc') {
+      ratingIcon = '<span style="color: #1a0dab; font-weight: bold;">&#9660;</span>';
+      ratingTitle = 'Sorted by rating descending (hardest first). Click to restore default order';
+    }
   }
-  $('#cfaRatingSortIcon').html(iconHtml);
-  $('#cfaSortRatingHeader').attr('title', sortTitle);
+  $('#cfaRatingSortIcon').html(ratingIcon);
+  $('#cfaSortRatingHeader').attr('title', ratingTitle);
+
+  let contestIcon = '&#x25B4;&#x25BE;';
+  let contestTitle = 'Click to sort by date of participation (oldest first)';
+  if (currentSortColumn === 'contest') {
+    if (currentSortDir === 'asc') {
+      contestIcon = '<span style="color: #1a0dab; font-weight: bold;">&#9650;</span>';
+      contestTitle = 'Sorted by participation date ascending (oldest first). Click to sort descending (newest first)';
+    } else if (currentSortDir === 'desc') {
+      contestIcon = '<span style="color: #1a0dab; font-weight: bold;">&#9660;</span>';
+      contestTitle = 'Sorted by participation date descending (newest first). Click to sort ascending (oldest first)';
+    }
+  }
+  $('#cfaContestSortIcon').html(contestIcon);
+  $('#cfaSortContestHeader').attr('title', contestTitle);
 }
 
 $(document).on('click', '#cfaSortRatingHeader', function (e) {
   e.preventDefault();
-  if (currentRatingSortDir === 'none') {
-    currentRatingSortDir = 'asc';
-  } else if (currentRatingSortDir === 'asc') {
-    currentRatingSortDir = 'desc';
+  if (currentSortColumn !== 'rating') {
+    currentSortColumn = 'rating';
+    currentSortDir = 'asc';
+  } else if (currentSortDir === 'asc') {
+    currentSortDir = 'desc';
   } else {
-    currentRatingSortDir = 'none';
+    currentSortColumn = 'none';
+    currentSortDir = 'none';
+  }
+  applyQueueFilterAndSortUI();
+});
+
+$(document).on('click', '#cfaSortContestHeader', function (e) {
+  e.preventDefault();
+  if (currentSortColumn !== 'contest') {
+    currentSortColumn = 'contest';
+    currentSortDir = 'asc';
+  } else if (currentSortDir === 'asc') {
+    currentSortDir = 'desc';
+  } else {
+    currentSortDir = 'asc';
   }
   applyQueueFilterAndSortUI();
 });
