@@ -25,6 +25,16 @@ var stackedShowLive = true;
 var stackedShowVirtual = true;
 var stackedShowPractice = true;
 var showToSolveSection = true;
+var ignoreSpecial = true;
+
+function isSpecialProblem(tags) {
+  if (!Array.isArray(tags)) return false;
+  return tags.some(t => {
+    if (typeof t !== 'string') return false;
+    const clean = t.trim().toLowerCase();
+    return clean === '*special' || clean === '*special problem' || clean.includes('special');
+  });
+}
 var toSolveMaxIndex = "E";
 var toSolveMaxRating = 0;
 var toSolveContestsCount = 5;
@@ -573,6 +583,10 @@ async function renderToSolveQueue(force = false, userRequested = false) {
 
     // Filter problems in this contest matching criteria (joined by AND)
     const candidateProblems = cr.problems.filter(p => {
+      if (ignoreSpecial && isSpecialProblem(p.tags)) {
+        return false;
+      }
+
       const indexAllowed = isIndexAllowed(p.index, maxIndex);
       if (!indexAllowed) return false;
 
@@ -1091,13 +1105,14 @@ function syncPageSettingsInputs(data) {
   }
 }
 
-chrome.storage.sync.get(["ratingMin", "ratingMax", "dateMin", "dateMax", "useRatingMin", "useRatingMax", "useDateMin", "useDateMax", "cumulativeMode", "stackedMode", "stackedShowLive", "stackedShowVirtual", "stackedShowPractice"], data => {
+chrome.storage.sync.get(["ratingMin", "ratingMax", "dateMin", "dateMax", "useRatingMin", "useRatingMax", "useDateMin", "useDateMax", "cumulativeMode", "stackedMode", "ignoreSpecial", "stackedShowLive", "stackedShowVirtual", "stackedShowPractice"], data => {
   if (data.ratingMin != "undefined" && data.useRatingMin) rating_min = data.ratingMin;
   if (data.ratingMax != "undefined" && data.useRatingMax) rating_max = data.ratingMax;
   if (data.dateMin != "undefined" && data.useDateMin) date_min = data.dateMin;
   if (data.dateMax != "undefined" && data.useDateMax) date_max = data.dateMax;
   if (typeof data.cumulativeMode === "boolean") cumulativeMode = data.cumulativeMode;
   stackedMode = (typeof data.stackedMode === "boolean") ? data.stackedMode : true;
+  ignoreSpecial = (typeof data.ignoreSpecial === "boolean") ? data.ignoreSpecial : true;
   if (typeof data.stackedShowLive === "boolean") stackedShowLive = data.stackedShowLive;
   if (typeof data.stackedShowVirtual === "boolean") stackedShowVirtual = data.stackedShowVirtual;
   if (typeof data.stackedShowPractice === "boolean") stackedShowPractice = data.stackedShowPractice;
@@ -1105,13 +1120,14 @@ chrome.storage.sync.get(["ratingMin", "ratingMax", "dateMin", "dateMax", "useRat
 
 chrome.storage.onChanged.addListener((changes, areaName) => {
   if (areaName === "sync") {
-    chrome.storage.sync.get(["ratingMin", "ratingMax", "dateMin", "dateMax", "useRatingMin", "useRatingMax", "useDateMin", "useDateMax", "cumulativeMode", "stackedMode", "stackedShowLive", "stackedShowVirtual", "stackedShowPractice", "mergedAccountsGroups", "showRatingsSection", "showTagsSection", "showUnsolvedSection", "showToSolveSection", "toSolveMaxIndex", "toSolveMaxRating", "toSolveContestsCount", "toSolveSinceDate", "toSolveIncludeLive", "toSolveIncludeVirtual"], data => {
+    chrome.storage.sync.get(["ratingMin", "ratingMax", "dateMin", "dateMax", "useRatingMin", "useRatingMax", "useDateMin", "useDateMax", "cumulativeMode", "stackedMode", "ignoreSpecial", "stackedShowLive", "stackedShowVirtual", "stackedShowPractice", "mergedAccountsGroups", "showRatingsSection", "showTagsSection", "showUnsolvedSection", "showToSolveSection", "toSolveMaxIndex", "toSolveMaxRating", "toSolveContestsCount", "toSolveSinceDate", "toSolveIncludeLive", "toSolveIncludeVirtual"], data => {
       rating_min = (data.ratingMin != "undefined" && data.useRatingMin) ? data.ratingMin : -1;
       rating_max = (data.ratingMax != "undefined" && data.useRatingMax) ? data.ratingMax : -1;
       date_min = (data.dateMin != "undefined" && data.useDateMin) ? data.dateMin : -1;
       date_max = (data.dateMax != "undefined" && data.useDateMax) ? data.dateMax : -1;
       cumulativeMode = (typeof data.cumulativeMode === "boolean") ? data.cumulativeMode : true;
       stackedMode = (typeof data.stackedMode === "boolean") ? data.stackedMode : true;
+      ignoreSpecial = (typeof data.ignoreSpecial === "boolean") ? data.ignoreSpecial : true;
       if (typeof data.stackedShowLive === "boolean") stackedShowLive = data.stackedShowLive;
       if (typeof data.stackedShowVirtual === "boolean") stackedShowVirtual = data.stackedShowVirtual;
       if (typeof data.stackedShowPractice === "boolean") stackedShowPractice = data.stackedShowPractice;
@@ -1254,6 +1270,7 @@ $(document).on('click', '#cfaUpdateBtn', function (e) {
     processData(cachedSubmissions);
     createProblemRatingChart();
     createTagChart();
+    renderToSolveQueue();
   }
 
   chrome.storage.sync.set({
@@ -1295,6 +1312,7 @@ $(document).on('click', '#cfaResetBtn', function (e) {
     processData(cachedSubmissions);
     createProblemRatingChart();
     createTagChart();
+    renderToSolveQueue();
   }
 
   chrome.storage.sync.set({
@@ -1377,7 +1395,7 @@ chrome.runtime.sendMessage({ todo: "appendHTML" }, function (response) {
 
   const profileHandle = getProfileHandleFromUrl(window.location.href);
 
-  chrome.storage.sync.get(["ratingMin", "ratingMax", "dateMin", "dateMax", "useRatingMin", "useRatingMax", "useDateMin", "useDateMax", "cumulativeMode", "stackedMode", "mergedAccountsGroups", "showRatingsSection", "showTagsSection", "showUnsolvedSection", "showToSolveSection", "toSolveMaxIndex", "toSolveMaxRating", "toSolveContestsCount", "toSolveSinceDate", "toSolveIncludeLive", "toSolveIncludeVirtual"], data => {
+  chrome.storage.sync.get(["ratingMin", "ratingMax", "dateMin", "dateMax", "useRatingMin", "useRatingMax", "useDateMin", "useDateMax", "cumulativeMode", "stackedMode", "ignoreSpecial", "mergedAccountsGroups", "showRatingsSection", "showTagsSection", "showUnsolvedSection", "showToSolveSection", "toSolveMaxIndex", "toSolveMaxRating", "toSolveContestsCount", "toSolveSinceDate", "toSolveIncludeLive", "toSolveIncludeVirtual"], data => {
     syncPageSettingsInputs(data);
 
     if (data.ratingMin != "undefined" && data.useRatingMin) rating_min = data.ratingMin;
@@ -1386,6 +1404,7 @@ chrome.runtime.sendMessage({ todo: "appendHTML" }, function (response) {
     if (data.dateMax != "undefined" && data.useDateMax) date_max = data.dateMax;
     if (typeof data.cumulativeMode === "boolean") cumulativeMode = data.cumulativeMode;
     stackedMode = (typeof data.stackedMode === "boolean") ? data.stackedMode : true;
+    ignoreSpecial = (typeof data.ignoreSpecial === "boolean") ? data.ignoreSpecial : true;
     if (typeof data.showToSolveSection === "boolean") showToSolveSection = data.showToSolveSection;
     if (data.toSolveMaxIndex !== undefined) toSolveMaxIndex = data.toSolveMaxIndex;
     if (data.toSolveMaxRating !== undefined) toSolveMaxRating = parseInt(data.toSolveMaxRating, 10) || 0;
@@ -1518,6 +1537,10 @@ function processData(resultArr) {
 
   for (var i = resultArr.length - 1; i >= 0; i--) {
     var sub = resultArr[i];
+    if (!sub.problem) continue;
+    if (ignoreSpecial && isSpecialProblem(sub.problem.tags)) {
+      continue;
+    }
     var problemId = sub.problem.contestId + '-' + sub.problem.index;
     if (!problems.has(problemId)) {
       problems.set(problemId, {
@@ -1529,6 +1552,7 @@ function processData(resultArr) {
         index: sub.problem.index,
         tags: sub.problem.tags,
         date: sub.creationTimeSeconds,
+        solveDate: null,
         team: false,
         official: false,
         virtual: false,
@@ -1556,6 +1580,9 @@ function processData(resultArr) {
       obj.use = false;
 
     if (sub.verdict == "OK") {
+      if (!obj.solved) {
+        obj.solveDate = sub.creationTimeSeconds;
+      }
       obj.solved = true;
       if (sub.problem && sub.problem.name) {
         solvedProblemNames.add(sub.problem.name.trim().toLowerCase());
@@ -2078,15 +2105,22 @@ function renderModalProblems() {
       ? `<span style="font-size: 0.8em; font-weight: bold; margin-left: 8px;" class="${ratingSpanColor(prob.rating)}">${formatRatingValue(prob.rating)}</span>`
       : '';
 
+    const solvedTime = prob.solveDate || prob.date;
+    const solvedDateStr = solvedTime ? timeToDate(solvedTime) : '';
+    const dateBadge = solvedDateStr
+      ? `<span style="font-size: 0.78em; color: #666; margin-right: 8px;" title="Date of first solving submission">${solvedDateStr}</span>`
+      : '';
+
     $body.append(`
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 4px; border-bottom: 1px solid #f0f0f0;">
         <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: 12px;">
           <a href="${url}" target="_blank" style="font-weight: bold; text-decoration: none; color: #1a0dab; margin-right: 8px;">
             ${prob.contestId}-${prob.index}
           </a>
-          <span style="color: #222;">${prob.name}</span>
+          <span style="color: #222;">${escapeHtml(prob.name)}</span>
         </div>
         <div style="display: flex; align-items: center; flex-shrink: 0;">
+          ${dateBadge}
           ${typeBadge}
           ${ratingBadge}
         </div>

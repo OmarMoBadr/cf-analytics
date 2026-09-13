@@ -1,7 +1,7 @@
 function load(){
   reset();
 
-  chrome.storage.sync.get(["ratingMin", "ratingMax", "dateMin", "dateMax", "useRatingMin", "useRatingMax", "useDateMin", "useDateMax", "cumulativeMode", "stackedMode", "mergedAccountsGroups", "showRatingsSection", "showTagsSection", "showUnsolvedSection", "showToSolveSection", "toSolveMaxIndex", "toSolveMaxRating", "toSolveContestsCount", "toSolveSinceDate", "toSolveIncludeLive", "toSolveIncludeVirtual"], data => {
+  chrome.storage.sync.get(["ratingMin", "ratingMax", "dateMin", "dateMax", "useRatingMin", "useRatingMax", "useDateMin", "useDateMax", "cumulativeMode", "stackedMode", "ignoreSpecial", "mergedAccountsGroups", "showRatingsSection", "showTagsSection", "showUnsolvedSection", "showToSolveSection", "toSolveMaxIndex", "toSolveMaxRating", "toSolveContestsCount", "toSolveSinceDate", "toSolveIncludeLive", "toSolveIncludeVirtual"], data => {
     if (data.ratingMin != "undefined" && data.useRatingMin){
       $("#ratingMinSpan").text(data.ratingMin);
       $("#ratingMin").val(data.ratingMin);
@@ -25,6 +25,11 @@ function load(){
       $("#stackedMode").prop("checked", data.stackedMode);
     } else {
       $("#stackedMode").prop("checked", true);
+    }
+    if (data.ignoreSpecial !== undefined) {
+      $("#ignoreSpecial").prop("checked", data.ignoreSpecial);
+    } else {
+      $("#ignoreSpecial").prop("checked", true);
     }
 
     $("#showRatingsSection").prop("checked", data.showRatingsSection !== undefined ? data.showRatingsSection : true);
@@ -61,6 +66,7 @@ function update(){
   const newDateMax = $("#dateMax").val();
   const cumulativeMode = $("#cumulativeMode").is(":checked");
   const stackedMode = $("#stackedMode").is(":checked");
+  const ignoreSpecial = $("#ignoreSpecial").is(":checked");
   const showRatingsSection = $("#showRatingsSection").is(":checked");
   const showTagsSection = $("#showTagsSection").is(":checked");
   const showUnsolvedSection = $("#showUnsolvedSection").is(":checked");
@@ -108,6 +114,7 @@ function update(){
     useDateMax: (newDateMax != ""),
     cumulativeMode: cumulativeMode,
     stackedMode: stackedMode,
+    ignoreSpecial: ignoreSpecial,
     mergedAccountsGroups: parsedGroups,
     showRatingsSection: showRatingsSection,
     showTagsSection: showTagsSection,
@@ -137,6 +144,7 @@ function reset(update = false){ // update the saved data as well or just the ui
       useDateMax: false,
       cumulativeMode: false,
       stackedMode: true,
+      ignoreSpecial: true,
       showRatingsSection: true,
       showTagsSection: false,
       showUnsolvedSection: false,
@@ -157,6 +165,7 @@ function reset(update = false){ // update the saved data as well or just the ui
   $("input[type=number], input[type=date]").val("");
   $("#cumulativeMode").prop("checked", false);
   $("#stackedMode").prop("checked", true);
+  $("#ignoreSpecial").prop("checked", true);
   $("#showRatingsSection").prop("checked", true);
   $("#showTagsSection").prop("checked", false);
   $("#showUnsolvedSection").prop("checked", false);
